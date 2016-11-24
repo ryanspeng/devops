@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet"type="text/css"href="/static/css/jquery.dataTables.min.css">
+<style>   
+.table th, .table td { 
+text-align: center; 
+}
+.widget-content .dataTables_filter{
+position:static;
+}
+</style>
+{% endblock %}
+{% block title %}Git项目管理{% endblock %}
+{% block breadcrumb %}<a href="/git/list">Git项目管理</a>{% endblock %}
+
+<!--主体内容-->
+{% block row %}
+
+<div class="widget-box">
+  <div class="widget-title">
+	  <span class="icon"> <i class="icon-th"></i></span>
+      <h5>Git项目管理</h5>
+      {%if info and info.role ==0%}
+      <button style='float:right;' class="btn btn-primary btn-sm" id="addBtn">添加项目</button>
+      {%endif%}
+  </div> <!--end widget-title-->
+
+<!--add modal-->                                                                                 
+<div id="addModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">添加项目</h4>
+	  </div><!--modal-header end-->
+
+      <div class="modal-body">
+     <p hidden id="errorMsg" class="text-danger" style="color:red"></p> <!-- foe error msg-->
+     <form class="form-horizontal" id="addForm">
+     	<div class="form-group">
+            <label class="control-label">Git项目名称</label>
+     		 <div class="controls">
+				<input id='project_name' type='text' name='name'>
+      		</div> 
+       	</div> <!--add project name -->
+		<div class='form-group'>
+			<label class='control-label'>仓库路径</label>
+			<div class='controls'>
+				<input id='project_path' type='text' name='path'>
+			</div>
+		</div><!--add project path-->
+		<div class='form-group'>
+			<label class='control-label'>负责人</label>
+			<div class='controls'>
+				<select name='principal' id='p_principal' class ="form-control multiselect"  multiple="multiple">
+				</select>
+            </div>
+        </div><!--add principal -->
+		<div class='form-group'>
+            <label class='control-label'>项目成员</label>
+			<div class='controls'>
+				<select name='p_user' id='p_user' class ="form-control multiselect"  multiple="multiple">
+		 	 	</select>
+             </div> 
+		</div><!--add p_user -->
+		<div class='form-group'>
+            <label class='control-label'>项目组</label>
+			<div class='controls'>
+			 	<select name='p_group' id='p_group' class ="form-control multiselect"  multiple="multiple">
+                </select>
+			</div> 
+		</div><!--add p_group -->
+		<div class='form-group'>
+			<label class='control-label'>状态</label>
+			<div class='controls'>
+			<select name='is_lock'>
+			 	<option value=0>正常</option>
+				<option value=1>锁定</option>
+			</select>
+			</div> 
+		</div> <!--add status-->
+
+		<div class='from-group'>
+			<label  class='control-label'>描述</label>
+			<div class='controls'>
+				<textarea  rows='3' name='comment'></textarea>
+			</div>
+        </div> <!-- comment -->
+    	<div class="form-group">
+     		<div class="modal-footer">
+                <button class="btn btn-primary" >添加</button>
+			 	<button class="btn btn-warning" data-dismiss="modal">退出</button>
+         	</div>
+      </div><!--button end-->
+    </form><!--form end-->
+
+   </div> <!--modal body end-->
+</div><!-- /.modal -->
+  
+
+
+<!--update modal-->                                                                                 
+<div id="updateModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Git管理</h4>
+	  </div><!--modal-header end-->
+
+      <div class="modal-body">
+     <p hidden id="uperrorMsg" class="text-danger" style="color:red"></p> <!-- foe error msg-->
+     <form class="form-horizontal" id="updateForm">
+        <input type="hidden" id='upid' name="id">  <!--update need id-->
+     	<div class="form-group">
+            <label class="control-label">Git项目名称</label>
+     		 <div class="controls">
+				<input id='up_project_name' type='text' name='name'>
+      		</div> 
+       	</div> <!--update project name -->
+		<div class='form-group'>
+			<label class='control-label'>仓库路径</label>
+			<div class='controls'>
+				<input id='up_project_path' type='text' name='path'>
+			</div>
+		</div><!--update project path-->
+		<div class='form-group'>
+			<label class='control-label'>负责人</label>
+			<div class='controls'>
+				<select name='principal' id='up_p_principal' class ="form-control multiselect"  multiple="multiple">
+ 				</select>
+ 			</div>
+		</div><!--update p_principal -->
+		<div class='form-group'>
+            <label  class='control-label'>项目成员</label>
+			<div class='controls'>
+				<select name='p_user' id='up_p_user'  class = "form-control multiselect"  multiple="multiple">
+				</select>
+			</div>
+        </div> <!--update p_user -->
+		<div class='form-group'>
+            <label  class='control-label'>项目组</label>
+			<div class='controls'>
+				<select name='p_group' id='up_p_group'  class = "form-control multiselect"  multiple="multiple">
+				</select>
+			</div>
+        </div> <!--update p_group -->
+		<div class='form-group'>
+			<label  class='control-label'>状态</label>
+			<div class='controls'>
+			<select id = 'up_is_lock'  name='is_lock'>
+				<option value=0>正常</option>
+				<option value=1>锁定</option>
+			</select>
+			</div>
+		</div> <!--update status-->
+
+		<div class='from-group'>
+			<label class='control-label'>comment</label>
+			<div class='controls'>
+				<textarea  id='up_comment' rows='3' name='comment'></textarea>
+			</div>
+		</div>
+
+    	<div class="form-group">
+     		<div class="modal-footer">
+				<button class="btn btn-primary" >更新</button>
+				<button class="btn btn-warning" data-dismiss="modal">退出</button>
+          	</div>
+      </div><!--button end-->
+    </form><!--form  end-->
+
+   </div> <!--modal body end-->
+</div><!-- /.modal -->
+
+<div class="widget-content">
+   <table id ="datatable"  class="table table-bordered table-striped" width="100%">
+	<thead>
+		<tr>
+            <th scope="col">项目名称</th>
+            <th scope="col">负责人</th>
+            <th scope="col">项目成员</th>
+            <th scope="col">项目组</th>
+            <th scope="col">状态</th>
+            {%if info and info.role ==0%}
+            <th scope="col">操作</th>
+            {%endif%}
+        </tr>
+    </thead> 
+    <tbody>
+    </tbody>
+   </table>
+</div> <!--widget-content-->
+
+</div> <!--widget-box end-->
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+<script>
+var name='git'
+/* list all data */
+function list(){
+    var url = "/listapi?method="+name
+    $.getJSON(url,function(data){
+      // data = data['result']  //string
+       data=JSON.parse(data['result']); //object 
+       var str = ''
+       $.each(data.result,function(k,v){   //循环输出数组Array[3]的值
+           if (v['is_lock'] == 0){
+               v['is_lock'] ="正常"
+               str +='<tr class="odd gradeX">'
+           }
+           else{
+               v['is_lock'] ="锁定"
+               str +='<tr style="color: red" class="odd gradeX">'
+           }
+           
+           str +='<td><div title="'+v['path']+'"><a href="'+"http://git.aiyuanxin.com/git/"+v['path']+'">'+v['name']+'</a></div></td>'+  
+           '<td>'+v['principal']+'</td>'+  
+           '<td>'+v['p_user']+'</td>'+ 
+           '<td>'+v['p_group']+'</td>'+ 
+           '<td>'+v['is_lock']+'</td>'+ 
+           '<td>'+ '{%if info and info.role ==0%}'+ 
+           '<button class="btn btn-primary btn-sm update-btn" data-id="'+v['id']+'">更新</button>'+
+           '</td>'+ '{%endif%}'
+           '</tr>'          
+       })       
+         $("tbody").html(str)
+ 		datatable()
+    })
+}
+list()
+/* DataTable */
+function datatable(){
+$('#datatable').DataTable({
+	"scrollX": true,
+	"bDestroy":true,
+    "language": {
+        "lengthMenu": "每页 _MENU_ 条记录",
+        "zeroRecords": "没有找到记录",
+        "sInfo": "第 _PAGE_ 页 ( 总共 _PAGES_ 页 ),显示第 _START_ 至 _END_ 项(总共 _TOTAL_ 项)",
+        "infoEmpty": "无记录",
+        "infoFiltered": "(从 _MAX_ 条记录过滤)",
+        "sSearch": "搜索:",
+        "oPaginate": {
+            "sFirst": "首页",
+            "sPrevious": "上一页",
+            "sNext": "下一页",
+            "sLast": "末页"
+        }
+    }
+});
+}
+/*  add data */
+/* click show modal */
+$('#addBtn').on('click',function(){
+		$('#addModal').modal('show')
+		userlist()
+		grouplist()
+})
+/* add data for ajax */ 
+$('#addForm').on('submit',function(){
+    if($('#add_principal').val() == null || $('#add_principal').val() ==""){
+		swal("OMG!", "你没有创建的权限，请联系管理员", "error")
+    }
+    var str = $('#addForm').serialize()
+    var data = {"method":'git',"formdata":str}
+    $.post("/addapi",data,function(data){
+     //console.log(data)    //string
+     data = JSON.parse(data)  //object
+     data = JSON.parse(data['result']) //object
+     if (data['code']==0){
+         swal({
+                title:"创建成功" ,
+                text:data['result'],
+                type:"success",
+                confirmButtonText: "Cool"
+            },function(){
+                window.location.reload();
+                $('#addModal').modal('hide')
+         });
+   }else{
+    $('#errorMsg').html('Failed:' +data['errmsg']).show()
+   }   
+
+  })  
+    return false
+})  
+
+/* get one data from id for update */
+$('tbody').on('click','.update-btn',function(){
+	var id = $(this).attr('data-id')
+    var url = "/getapi?method="+name+"&id="+id
+	$.getJSON(url,function(data){
+      data = JSON.parse(data['result'])
+      if (data['code']==0){
+          $('#upid').val(data['result']['id'])
+          $('#up_project_name').val(data['result']['name'])
+		  $('#up_project_path').val(data['result']['path'])
+          $('#up_is_lock').val(data['result']['is_lock'])
+		  $('#up_comment').val(data['result']['comment'])
+	      $('#updateModal').modal('show')  //show modal
+          s_userlist(id)
+          s_grouplist(id)
+          s_principal(id)
+      }else{
+         swal("OMG!", data['errmsg'], "error"); 
+      }
+	})
+})
+
+/*获取项目的负责人，拼接为下拉列表*/
+function s_principal(id){
+    var url = "/getapi?method=selected&id="+id+"&m_table=git&field=principal&s_table=user"
+    $.getJSON(url, function(data){
+        data=JSON.parse(data['result'])
+        var str=''
+        $.each(data.result, function(k,v){
+            str +='<option value='+v['id']+" "+v['selected']+'>'+v['name']+
+             '</option>'
+        })
+        $("#up_p_principal").html(str)
+        $("#up_p_principal").multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+        $("#up_p_principal").multiselect('refresh');
+    })
+}
+
+/*获取项目的成员，拼接为下拉列表*/
+function s_userlist(id){
+    var url = "/getapi?method=selected&id="+id+"&m_table=git&field=p_user&s_table=user"
+    $.getJSON(url, function(data){
+        data=JSON.parse(data['result'])
+        var str=''
+        $.each(data.result, function(k,v){
+            str +='<option value='+v['id']+" "+v['selected']+'>'+v['name']+
+             '</option>'
+        })
+        $("#up_p_user").html(str)
+        $("#up_p_user").multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+        $("#up_p_user").multiselect('refresh');
+    })
+}
+
+/*获取项目的组，拼接为下拉列表*/
+function s_grouplist(id){
+    var url = "/getapi?method=selected&id="+id+"&m_table=git&field=p_group&s_table=user_group"
+    $.getJSON(url, function(data){
+        data=JSON.parse(data['result'])
+        var str=''
+        $.each(data.result, function(k,v){
+            str +='<option value='+v['id']+" "+v['selected']+'>'+v['name']+
+            '</option>'
+        })
+        $("#up_p_group").html(str)
+        $("#up_p_group").multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+        $("#up_p_group").multiselect('refresh');
+    })
+}
+
+
+
+
+/*update data*/
+$('#updateForm').on('submit',function(){
+var str = $('#updateForm').serialize()
+var data = {'method':name,'formdata':str}
+$.post('/updateapi',data, function(data){  // data is string
+    data = JSON.parse(data)    //object
+    data = JSON.parse(data['result']) //object
+    if (data['code']==0){   
+         swal({
+                title:"更新成功" ,
+                text:data['result'],
+                type:"success",
+                confirmButtonText: "Cool"
+            },function(){
+                window.location.reload();
+                $('#updateModal').modal('hide')
+                list()
+         });
+    }else{
+		$('#uperrorMsg').html('Failed:'+data['errmsg']).show()
+    }
+})
+    return false   //get data and end
+})  //submit form
+
+
+
+//获得所有用户列表信息
+function userlist(){
+	var url = "/listapi?method=user"
+	var str=""
+	$.getJSON(url,function(data){
+		data = JSON.parse(data.result)
+		$.each(data.users, function(k,v){
+			str += '<option value="' + v['id'] +'">' + v['username'] + '</option>'
+		})
+		$("#p_user,#p_principal").html(str)
+		$("#p_user,#p_principal").multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+		$("#p_user,#p_principal").multiselect('refresh')
+	})
+}
+
+//获得所有组列表信息
+function grouplist(){
+    var url = "/listapi?method=groups"
+    var str=""
+    $.getJSON(url,function(data){
+        data = JSON.parse(data.result)
+        $.each(data.result, function(k,v){
+            str += '<option value="' + v['id'] +'">' + v['name'] + '</option>'
+        })
+        $("#p_group").html(str)
+		$("#p_group").multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+        $("#p_group").multiselect('refresh')
+     })
+}
+
+</script>
+{% endblock %}

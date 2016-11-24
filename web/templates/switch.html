@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet"type="text/css"href="/static/css/jquery.dataTables.min.css">
+<style>   
+.table th, .table td { 
+text-align: center; 
+}
+.widget-content .dataTables_filter{
+position:static;
+}
+</style>
+{% endblock %}
+{% block title %}网络设备管理{% endblock %}
+{% block breadcrumb %}<a href="/cmdb/switch">网络设备管理</a>{% endblock %}
+
+<!--主体内容-->
+{% block row %}
+
+<div class="widget-box">
+  <div class="widget-title">
+	  <span class="icon"> <i class="icon-th"></i></span>
+      <h5>网络设备管理</h5>
+      <button style='float:right;' class="btn btn-primary btn-sm" id="addBtn">添加网络设备</button>
+  </div> <!--end widget-title-->
+
+<!--add modal-->                                                                                 
+<div id="addModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">添加网络设备</h4>
+	  </div><!--modal-header end-->
+
+      <div class="modal-body">
+     <p hidden id="errorMsg" class="text-danger" style="color:red"></p> <!-- foe error msg-->
+     <form class="form-horizontal" id="addForm">
+     	<div class="form-group">
+            <label class="control-label">网络设备名称</label>
+     		 <div class="controls">
+       		 	<input id="name"  type="text"  name="name" >
+      		</div> 
+       	</div> <!--add name end-->
+        <div class="form-group">
+            <label class="control-label">IP地址</label>
+     		 <div class="controls">
+       		 	<input id="ipaddr"  type="text"  name="ip" >
+      		</div> 
+        </div> <!--add ip end-->
+     	<div class="form-group">
+            <label class="control-label">设备类型</label>
+     		 <div class="controls">
+       		 	<input id="type"  type="text"  name="type" >
+      		</div> 
+       	</div> <!--add type end-->
+     	<div class="form-group">
+            <label class="control-label">生产商</label>
+     		 <div class="controls">
+                 <select name="manufacturer_id" class="manufact_info" id="manufacturer_id">
+                 </select>
+      		</div> 
+       	</div> <!--add manufacturer end-->
+        <div class="form-group">
+            <label class="control-label">供应商</label>
+     		 <div class="controls">
+                 <select name="supplier_id" class="supplier_info" id="supplier_id">
+                 </select>
+      		</div> 
+        </div> <!--add supplier end-->
+             <div class="form-group">
+            <label class="control-label">机房</label>
+      		<div class="controls">
+                <!--       			<input id="idc_id" type="text"  name="idc_id" >-->
+                <select name="idc_id" class="idc_info" id="idc"> 
+                </select>
+      		</div> 
+		</div><!--add idc_id end -->
+        <div class="form-group">
+            <label class="control-label">机柜</label>
+      		<div class="controls">
+                <!--       			<input id="cabinet_id"  type="text"  name="cabinet_id" >-->
+                <select name="cabinet_id" class="cabinet_info" id="cabinet_id">
+                </select>
+      		</div> 
+		</div><!--add cabinet_id end -->
+        <div class="form-group">
+            <label class="control-label">采购时间</label>
+      		<div class="controls">
+       			<input id="store_date" type="date"  name="store_date" >
+      		</div> 
+		</div><!--add store_date end -->
+        <div class="form-group">
+            <label class="control-label">过期时间</label>
+      		<div class="controls">
+       			<input id="expire"  type="date"  name="expire" >
+      		</div> 
+		</div><!--add expire end -->
+        <div class="form-group">
+            <label class="control-label">端口数量</label>
+      		<div class="controls">
+       			<input id="port_num"  type="text"  name="port_num" >
+      		</div> 
+		</div><!--add port_num end -->
+        <div class="form-group">
+            <label class="control-label">状态</label>
+     		 <div class="controls">
+       			<select name="status"  id="status">
+                    <option value="0">在线</option> 
+                    <option value="1">离线</option> 
+				</select> 
+      		</div> 
+       	</div> <!--add status end -->
+        <div class="form-group">
+            <label class="control-label">备注</label>
+      		<div class="controls">
+                <!--       			<input id="remark" type="text"  name="remark" >-->
+                <textarea class="form-control" rows="3" id="remark" name="remark"></textarea>
+      		</div> 
+		</div><!--add remark end -->
+    	<div class="form-group">
+     		<div class="modal-footer">
+                <button class="btn btn-primary" >添加</button>
+				<button class="btn btn-warning" data-dismiss="modal">退出</button>
+         	</div>
+      </div><!--button end-->
+    </form><!--form end-->
+
+   </div> <!--modal body end-->
+</div><!-- /.modal -->
+  
+
+
+<!--update modal-->                                                                                 
+<div id="updateModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">网络设备管理</h4>
+	  </div><!--modal-header end-->
+
+      <div class="modal-body">
+     <p hidden id="uperrorMsg" class="text-danger" style="color:red"></p> <!-- foe error msg-->
+     <form class="form-horizontal" id="updateForm">
+        <input type="hidden" id='upid' name="id">  <!--update need id-->
+     	<div class="form-group">
+            <label class="control-label">网络设备名称</label>
+     		 <div class="controls">
+       		 	<input id="upname"  type="text"  name="name" >
+      		</div> 
+       	</div> <!--update name end-->
+        <div class="form-group">
+            <label class="control-label">IP地址</label>
+     		 <div class="controls">
+       		 	<input id="upipaddr"  type="text"  name="ip" >
+      		</div> 
+        </div> <!--add name end-->
+     	<div class="form-group">
+            <label class="control-label">设备类型</label>
+     		 <div class="controls">
+       		 	<input id="uptype"  type="text"  name="type" >
+      		</div> 
+       	</div> <!--update type end-->
+        <div class="form-group">
+            <label class="control-label">生产商</label>
+      		<div class="controls">
+                <select name="manufacturer_id" class="manufact_info" id="upmanufacturer_id"> 
+                </select>
+      		</div> 
+        </div><!--update manufacturer_id end -->
+        <div class="form-group">
+            <label class="control-label">供应商</label>
+      		<div class="controls">
+                <select name="supplier_id" class="supplier_info" id="upsupplier_id"> 
+                </select>
+      		</div> 
+        </div><!--update supplier_id end -->
+     	        <div class="form-group">
+            <label class="control-label">机房</label>
+      		<div class="controls">
+                <!--                <input id="upidc_id" type="text"  name="idc_id" >-->
+                <select name="idc_id"  class="idc_info" id="upidc">
+                </select>
+      		</div> 
+		</div><!--update idc_id end -->
+        <div class="form-group">
+            <label class="control-label">机柜</label>
+      		<div class="controls">
+                <!--<input id="upcabinet_id" type="text"  name="cabinet_id" >-->
+                <select name="cabinet_id" class="cabinet_info" id="upcabinet_id">
+                </select>
+      		</div> 
+		</div><!--update cabinet_id end -->
+     	<div class="form-group">
+            <label class="control-label">采购时间</label>
+      		<div class="controls">
+                <input id="upstore_date" type="date"  name="store_date" >
+      		</div> 
+		</div><!--update store_date  end -->
+        <div class="form-group">
+            <label class="control-label">过期时间</label>
+      		<div class="controls">
+       			<input id="upexpire" type="date"  name="expire" >
+      		</div> 
+		</div><!--update expire  end -->
+        <div class="form-group">
+            <label class="control-label">端口数量</label>
+      		<div class="controls">
+       			<input id="upport_num" type="text"  name="port_num" >
+      		</div> 
+		</div><!--update port_num end -->
+        <div class="form-group">
+            <label class="control-label">状态</label>
+     		 <div class="controls">
+       			<select name="status"  id="upstatus">
+                    <option value="0">在线</option> 
+                    <option value="1">离线</option> 
+				</select> 
+      		</div> 
+       	</div> <!--update status end -->
+        <div class="form-group">
+            <label class="control-label">备注</label>
+      		<div class="controls">
+                <!--			<input id="upremark" type="text"  name="remark" >-->
+                <textarea class="form-control" rows="3" id="upremark" name="remark"></textarea>
+      		</div> 
+        </div><!--update remark end -->
+    	<div class="form-group">
+     		<div class="modal-footer">
+				<button class="btn btn-primary" >更新</button>
+				<button class="btn btn-warning" data-dismiss="modal">退出</button>
+         	</div>
+      </div><!--button end-->
+    </form><!--form end-->
+
+   </div> <!--modal body end-->
+</div><!-- /.modal -->
+
+<div class="widget-content">
+   <table id ="datalist" class="table table-bordered table-striped">
+	<thead>
+		<tr>
+            <th scope="col">网络设备名称</th>
+            <th scope="col">IP地址</th>
+            <th scope="col">设备类型</th>
+            <th scope="col">机房</th>
+            <th scope="col">机柜</th>
+            <th scope="col">端口数量</th>
+            <th scope="col">状态</th>
+            <th scope="col">备注</th>
+            <th scope="col">操作</th>
+        </tr>
+    </thead> 
+    <tbody>
+    </tbody>
+   </table>
+</div> <!--widget-content-->
+
+</div> <!--widget-box end-->
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+<script>
+var name=window.location.pathname.split('/').pop()
+function datatable(){
+$(document).ready(function(){
+$('#datalist').DataTable({
+   "bDestroy":true,
+   "language": {
+        "lengthMenu": "每页 _MENU_ 条记录",
+        "zeroRecords": "没有找到记录",
+        "sInfo": "第 _PAGE_ 页 ( 总共 _PAGES_ 页 ),显示第 _START_ 至 _END_ 项(总共 _TOTAL_ 项)",
+        "infoEmpty": "无记录",
+        "infoFiltered": "(从 _MAX_ 条记录过滤)",
+        "sSearch": "搜索:",
+        "oPaginate": {
+            "sFirst": "首页",
+            "sPrevious": "上一页",
+            "sNext": "下一页",
+            "sLast": "末页"
+            }
+        }  
+    })
+})
+}
+var idc_array = {}
+var idc_select=''
+var cabinet_array = {}
+var cabinet_select =''
+var manufact_select = ''
+var supplier_select = ''
+var idc_url = "/listapi?method=idc"
+var cabinet_url = "/listapi?method=cabinet"
+var manufact_url="/listapi?method=manufact"
+$.ajaxSettings.async = false;  
+$.getJSON(idc_url,function(data){
+        data = JSON.parse(data['result'])
+        $.each(data.result,function(k,v){
+        idc_array[v['id']]=v['name']
+        idc_select +='<option value="'+v['id']+'">'+v['name']+'</option>' 
+        })
+})
+$.getJSON(cabinet_url,function(data){
+        data = JSON.parse(data['result'])
+        $.each(data.result,function(k,v){
+        cabinet_array[v['id']]=v['name']
+        cabinet_select +='<option value="'+v['id']+'">'+v['name']+'</option>' 
+        })
+})
+
+$.getJSON(manufact_url,function(data){
+        data = JSON.parse(data['result'])
+        $.each(data.result,function(k,v){
+        manufact_select +='<option value="'+v['id']+'">'+v['name']+'</option>' 
+        supplier_select += '<option value="'+v['id']+'">'+v['supplier_name']+'</option>'
+        })
+})
+
+/* list all data */
+function list(){
+    var name=window.location.pathname.split('/').pop()
+    var url = "/listapi?method="+name
+    $.getJSON(url,function(data){
+      // data = data['result']  //string
+       data=JSON.parse(data['result']); //object 
+       console.log(data)   //Object {count: 3, code: 0, result: Array[3]}
+       var count =  data['count']     
+       var str = ''
+       $.each(data.result,function(k,v){   //循环输出数组Array[3]的值
+        //   console.log(v)   //Object {idc_id: 1, u_num: 32, id: 1, power: "20A", name: "O04"} 
+           if (v['status']==0){
+               v['status']="在线"
+           }
+           else{
+               v['status']="离线"
+           }
+           if (v['warning'] == 1) {
+               str += '<tr class="odd gradeX warning">';
+           } else if (v['warning'] == 2) {
+               str += '<tr class="odd gradeX error">';
+           } else {
+               str += '<tr class="odd gradeX">';
+           }
+           str += '<td>'+v['name']+'</td>'+  
+           '<td>'+v['ip']+'</td>'+  
+           '<td>'+v['type']+'</td>'+  
+           '<td>'+idc_array[v['idc_id']]+'</td>'+  
+           '<td>'+cabinet_array[v['cabinet_id']]+'</td>'+  
+           '<td>'+v['port_num']+'</td>'+ 
+           '<td>'+v['status']+'</td>'+ 
+           '<td>'+v['remark']+'</td>'+ 
+           '<td>'+
+           '<button class="btn btn-primary btn-sm update-btn" data-id="'+v['id']+'">更新</button>'+
+           '<button class="btn btn-danger btn-sm delete-btn" data-id="'+v['id']+'">删除</button>'+
+           '</td>'+ 
+           '</tr>'          
+       })       
+         $("tbody").html(str)
+         datatable()
+    })
+}
+list()
+/*  add data */
+/*click show modal*/
+$('#addBtn').on('click',function(){
+		$('#addModal').modal('show')
+        $('#idc').html(idc_select)
+        $("#cabinet_id").html(cabinet_select)
+        $('#manufacturer_id').html(manufact_select)
+        $('#supplier_id').html(supplier_select)
+})
+/* add data for ajax */ 
+$('#addForm').on('submit',function(){
+	   var str = $('#addForm').serialize()
+       str = str.replace(/\+/g," ")   // g表示对整个字符串中符合条件的都进行替换
+       str = decodeURIComponent(str)  //对serialize后的内容进行解码
+       var data = {"method":name,"formdata":str}
+	   $.post("/addapi",data,function(data){
+	     //console.log(data)    //string
+         data = JSON.parse(data)  //object
+         data = JSON.parse(data['result']) //object
+         if (data['code']==0){
+            swal({
+                title:"添加成功",
+                type: "success",
+                confirmButtonText: "Cool"
+            },function(){
+                $('#addModal').modal('hide')
+                list()
+                location.reload()
+            })
+         }else{
+		    $('#errorMsg').html('Failed:'+data['errmsg']).show()
+         }  //end swal
+    })   //end post
+	return false
+})  //submit form
+
+/*get one data from id for update*/
+$('tbody').on('click','.update-btn',function(){
+    $('#upidc').html(idc_select)
+    $('#upcabinet_id').html(cabinet_select)
+    $('#upmanufacturer_id').html(manufact_select)
+    $('#upsupplier_id').html(supplier_select)
+	$('#updateModal').modal('show')  //show modal
+	var id = $(this).attr('data-id')
+    var url = "/getapi?method="+name+"&id="+id
+    console.log(url)
+	$.getJSON(url,function(data){
+      data = JSON.parse(data['result'])
+      if (data['code']==0){
+          $('#upid').val(data['result']['id'])
+          $('#upname').val(data['result']['name'])
+          $('#upipaddr').val(data['result']['ip'])
+          $('#uptype').val(data['result']['type'])
+          $('#upmanufacturer_id').val(data['result']['manufacturer_id'])
+          $('#upsupplier_id').val(data['result']['supplier_id'])
+          $('#upidc').val(data['result']['idc_id'])
+          $('#upcabinet_id').val(data['result']['cabinet_id'])
+          $('#upstore_date').val(data['result']['store_date'])
+          $('#upexpire').val(data['result']['expire'])
+          $('#upport_num').val(data['result']['port_num'])
+          $('#upstatus').val(data['result']['status'])
+          $('#upremark').val(data['result']['remark'])
+      }else{
+          swal("OMG!",data['errmsg'], "error"); 
+      }
+	})
+})
+
+/*update data*/
+$('#updateForm').on('submit',function(){
+var str = $('#updateForm').serialize()
+    str = str.replace(/\+/g," ")   // g表示对整个字符串中符合条件的都进行替换
+    str = decodeURIComponent(str)  //对serialize后的内容进行解码
+    console.log(str)
+var data = {'method':name,'formdata':str}
+console.log(data)
+$.post('/updateapi',data, function(data){  // data is string
+    data = JSON.parse(data)    //object
+    data = JSON.parse(data['result']) //object
+    console.log(data)
+    if (data['code']==0){   
+		swal({ 
+			 title: "更新成功!", 
+			 text: data['result'],   
+			 type: "success",   
+			 confirmButtonText: "Cool"
+		 },function(){               
+			$('#updateModal').modal('hide')
+			list()
+			location.reload()
+		});
+    }else{
+		$('#uperrorMsg').html('Failed:'+data['errmsg']).show()
+    }
+})
+    return false   //get data and end
+})  //submit form
+
+/*delete cmdb 删除的操作几乎没有，web界面不提供删除接口，真需要删除走api*/
+$("tbody").on('click','.delete-btn',function(){
+        var that = this;
+		var id = $(this).attr('data-id')
+        var url = "/deleteapi?method="+name+"&id="+id
+				swal({
+					   title: "确定要删除吗?",
+					   text: "一旦删除就无法恢复，请三思！！！ ",
+					   type: "warning",
+					   showCancelButton: true,
+					   confirmButtonColor: "#DD6B55",
+					   confirmButtonText: "确认删除!",
+				  	   cancelButtonText: "容我再想想!",  
+                       closeOnConfirm: false, 	
+					   closeOnConfirm: false                     
+				}, function(isConfirm){
+					if (isConfirm){
+						$.getJSON(url,function(data){
+							data = JSON.parse(data['result'])
+							if (data['code']== 0 ){
+				 				swal({ 
+				   						 title: "删除成功", 
+										  text: data['result'],   
+										  type: "success",   
+										  confirmButtonText: "Cool"    
+									  },function(){               
+										$(that).parents('tr').remove();
+										list()
+										location.reload()
+							 });
+						}else{
+							swal("OMG!", data['errmsg'], "error"); 	
+					   }
+				}) //end getJSON
+            }else{
+				 swal("Cancelled", "取消删除成功", "error");   
+			}
+	     })
+ return false   //get data and end
+})   
+</script>
+{% endblock %}

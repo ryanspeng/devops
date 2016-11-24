@@ -1,0 +1,256 @@
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="pragma" content="no-cache">
+    <meta name="robots" content="index,follow">
+    <meta name="Author" content="Yuanxin Inc.">
+    <meta name="Keywords" content="ocr, miaoshou.com">
+    <meta name="Description" content="Yuanxin Devops System">
+
+    <link type="image/x-icon" rel="shortcut icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/matrix-style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/matrix-media.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/font-awesome.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='sweetalert/dist/sweetalert.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap-multiselect.css')}}">
+    {% block css %} {% endblock%}
+    <title>Devops - {% block title %}{% endblock %}</title>
+</head>
+
+<body>
+<!--Header-part-->
+<div id="header">
+    <h1><a href="#">Devops</a></h1>
+</div>
+<!--close-Header-part-->
+
+<!--top-Header-menu-->
+<div id="user-nav" class="navbar navbar-inverse">
+    <ul class="nav">
+        <li  class="dropdown" id="profile-messages" >
+            <a title="" href="#" data-toggle="dropdown" data-target="#profile-messages" class="dropdown-toggle"><i class="icon icon-user"></i> 
+                <span class="text">{% if errmsg %}<span style="color: red;">{{errmsg}}</span>{%else%}{{info.username}}{%endif%}</span>
+            <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/user/info"><i class="icon-user"></i>个人中心</a></li>
+                <li class="divider"></li>
+                <li><a href="/logout"><i class="icon-key"></i>退出登录</a></li>
+            </ul>
+        </li>
+        <li><a href="/logout"><i class="icon icon-share-alt"></i><span class="text">退出登录</span></a></li>
+    </ul>
+</div>
+<!--close-top-Header-menu-->
+
+<!--sidebar-menu-->
+<div id="sidebar">
+    <ul>
+		<li class="active"><a href="/"><i class="icon icon-home"></i> <span>控制面板</span></a> </li>
+        {% if 'pre_click' in info and info.pre_click == 'user' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+             <a href="javascript:;">
+                 <i class="icon icon-user-md"></i><span>账号中心</span>
+                {% if 'pre_click' in info and info.pre_click == 'user' %}
+                <span class="arrow icon-chevron-up icon-chevron-down"></span>
+                {% else %}
+                <span class="arrow icon-chevron-up"></span>
+                {% endif %}
+            </a>
+            {% if info and info.role == 0 %}
+            <ul>
+                <li class="sa"><a href="/user/add">添加用户</a></li>
+                <li class="sa"><a href="/user/list">用户列表</a></li>
+                <li class="sa"><a href="/role/list">角色管理</a></li>
+            </ul>
+            {% endif %}
+        </li>  <!--end user-->
+        {% if 'pre_click' in info and info.pre_click == 'perm' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-bell"></i><span>权限管理</span>
+            {% if 'pre_click' in info and info.pre_click == 'perm' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        {% if info and info.role == 0 %}
+        <ul>
+            <li class="sa"><a href="/power/list">权限列表</a></li>
+        </ul>
+        {% endif %}
+        </li> <!--end priviage-->
+        {% if 'pre_click' in info and info.pre_click == 'cmdb' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-star"></i><span>CMDB系统</span>
+            {% if 'pre_click' in info and info.pre_click == 'cmdb' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        {% if info and info.role == 0 %}
+        <ul>
+            <li class="sa"><a href="/cmdb/host">主机管理</a></li>
+            <li class="sa"><a href="/cmdb/switch">网络设备管理</a></li>
+            <li class="sa"><a href="/cmdb/idc">机房管理</a></li>
+            <li class="sa"><a href="/cmdb/cabinet">机柜管理</a></li>
+            <li class="sa"><a href="/cmdb/manufact">供应商管理</a></li>
+            <li class="sa"><a href="/cmdb/services">服务管理</a></li>
+            <li class="sa"><a href="/cmdb/softassets">软资产管理</a></li>
+        </ul>
+        {% endif %}
+        </li> <!--end cmdb-->
+        {% if 'pre_click' in info and info.pre_click == 'git' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-file"></i><span>代码管理</span>
+            {% if 'pre_click' in info and info.pre_click == 'git' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        {% if info and 'git' in info.perm %}
+        <ul>
+            <li class="sa"><a href="/git/list">git仓库列表</a></li>
+        </ul>
+        {% endif %}
+        </li> <!--end git-->
+        {% if 'pre_click' in info and info.pre_click == 'deploy' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-tag"></i><span>发布系统</span>
+            {% if 'pre_click' in info and info.pre_click == 'deploy' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        <ul>
+            {% if info and 'testing' in info.perm %}
+            <li><a href="/project/testing">测试发布</a></li>
+            {% endif %}
+            {% if info and 'apply' in info.perm %}
+            <li><a href="/project/apply">申请发布</a></li>
+            {% endif %}
+            {% if info and 'deploy' in info.perm %}
+            <li><a href="/project/applylist">申请列表</a></li>
+            {% endif %}
+            {% if info and 'uplist' in info.perm %}
+            <li><a href="/project/uplist">发布列表</a></li>
+            {% endif %}
+        </ul>
+        </li> <!--end project-->
+        {% if 'pre_click' in info and info.pre_click == 'ext' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-wrench"></i><span>扩展接口</span>
+            {% if 'pre_click' in info and info.pre_click == 'ext' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        <ul>
+            {% if info and 'cdn' in info.perm %}
+            <li ><a href="/cdn">cdn刷新接口</a></li>
+            {% endif %}
+            {% if info and 'dbreset' in info.perm %}
+            <li ><a href="/dbreset">仿真数据库初始化</a></li>
+            {% endif %}
+            {% if info and 'phpmyadmin' in info.perm %}
+            <li ><a href="/phpmyadmin">访问仿真数据库</a></li>
+            {% endif %}
+            {% if info and 'jumpserver' in info.perm %}
+            <li ><a href="http://jump.aiyuanxin.com/login?auth={{ info.author }}&fix_pwd={{ info.fix_pwd }}" target="_blank">JumpServer</a></li>
+            {% endif %}
+        </ul>
+        </li> <!--end priviage-->
+        {% if 'pre_click' in info and info.pre_click == 'opsjob' %}
+        <li class="submenu open">
+        {% else %}
+        <li class="submenu">
+        {% endif %}
+        <a href="javascript:;">
+            <i class="icon icon-tasks"></i><span>工单管理</span>
+            {% if 'pre_click' in info and info.pre_click == 'opsjob' %}
+            <span class="arrow icon-chevron-up icon-chevron-down"></span>
+            {% else %}
+            <span class="arrow icon-chevron-up"></span>
+            {% endif %}
+        </a>
+        <ul>
+            <li><a href="/opsjob/apply">工单申请</a></li>
+            {% if info and info.role == 0 %}
+            <li><a href="/opsjob/applist">工单申请列表</a></li>
+            {% endif %}
+            <li><a href="/opsjob/history">历史工单列表</a></li>
+        </ul>
+    </ul>
+</div>
+<!--sidebar-menu-->
+
+<!--main-container-part-->
+<div id="content">
+    <div id="content-header">
+        <div id="breadcrumb">
+            <a href="/" title="回到首页" class="tip-bottom"><i class="icon-home"></i>管理首页</a>
+            {% block breadcrumb %}{% endblock %}
+        </div>
+        <h1>{% block h1 %}{% endblock %}</h1>
+    </div><!--end content-header-->
+
+    <div class="container-fluid"><hr>
+        <div class="row-fluid">
+            {% block row %}
+            <h2>你的内容都在这里</h2>
+            {% endblock %}
+        </div> <!--end row-fluid-->
+
+    </div> <!--end content-fluid-->
+</div> <!--end content-->
+<!--end-main-container-part-->
+
+<!--Footer-part-->
+<div class="row-fluid">
+    <div id="footer" class="span12">CopyRights 2015 (c) Yuanxin-inc.COM All Rights Reserved.</div>
+</div>
+
+<!--end-Footer-part-->
+
+<script type="text/javascript" src="{{url_for('static',filename='js/excanvas.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/jquery.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/jquery.ui.custom.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/matrix.js')}}"></script> 
+<script type="text/javascript" src="{{url_for('static',filename='sweetalert/dist/sweetalert.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/bootstrap-multiselect.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/Validform_v5.3.2_min.js')}}"></script> 
+
+{% block js%}
+{% endblock %}
+
+</body></html>

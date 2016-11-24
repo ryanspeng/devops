@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet"type="text/css"href="/static/css/jquery.dataTables.min.css">
+<style>   
+.table th, .table td { 
+text-align: center; 
+}
+.widget-content .dataTables_filter{
+position:static;
+}
+</style>
+{% endblock %}
+{% block title %}测试发布{% endblock %}
+{% block breadcrumb %}<a href="/project/testing">测试发布</a>{% endblock %}
+
+<!--主体内容-->
+{% block row %}
+
+<div class="widget-content">
+   <table id ="datalist"  class="table table-bordered table-striped">
+	<thead>
+		<tr>
+            <th scope="col">项目</th>
+			<th scope="col">测试主机</th>
+            <th scope="col">最近发布人</th>
+            <th scope="col">最近发布时间</th>
+            <th scope="col">备注</th>
+            <th scope="col">操作</th>
+        </tr>
+    </thead> 
+    <tbody>
+        {% if result %}
+        {% for project in result %}
+        <tr>
+            <td class="p_name">{{ project.name }}</td>
+            <td class="host">{{ project.host }}</td>
+            <td class="pusher"></td>
+            <td class="push_date"></td>
+            <td class="comment"></td>
+            <td>
+                <button class="btn btn-primary btn-sm online-btn" data-id='{{ project.id }}' data='{{ project.name }}'>测试上线</button>
+                <a class="btn btn-primary btn-sm detail-btn" href="/project/testhistory?id={{ project.id }}">上线记录</button>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+   </table>
+</div> <!--widget-content-->
+
+</div> <!--widget-box end-->
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+<script>
+var name=window.location.pathname.split('/').pop()
+function datatable(){
+$('#datalist').DataTable({
+   "bDestroy":true,
+   "paging": false,
+   "language": {
+        "lengthMenu": "每页 _MENU_ 条记录",
+        "zeroRecords": "没有找到记录",
+//        "sInfo": "第 _PAGE_ 页 ( 总共 _PAGES_ 页 ),显示第 _START_ 至 _END_ 项(总共 _TOTAL_ 项)",
+        "sInfo": "显示第 _START_ 至 _END_ 项(总共 _TOTAL_ 项)",
+        "infoEmpty": "无记录",
+        "infoFiltered": "(从 _MAX_ 条记录过滤)",
+        "sSearch": "搜索:",
+//        "oPaginate": {
+//            "sFirst": "首页",
+//            "sPrevious": "上一页",
+//            "sNext": "下一页",
+//            "sLast": "末页"
+//            }
+        }  
+
+    })
+}
+
+/* list all data */
+function list(){
+    var name="lastest_record"
+    var url = "/listapi?method="+name
+    $.getJSON(url,function(data){
+      // data = data['result']  //string
+       data=JSON.parse(data['result']); //object 
+       console.log("data =",data)   //Object {count: 3, code: 0, result: Array[3]}
+       $.each(data.result,function(k,v){   //循环输出数组Array[3]的值
+            console.log(v)
+            var parent=$("[data-id="+v.project_id+"]").parents('tr');  //找到project_id 对应的列 
+            for(var i in v){
+                parent.find("."+i).html(v[i]);  //将第一组数据根据对应的class名渲染数据
+            }
+       })       
+    })
+}
+list()
+datatable()
+$("tbody").on('click','.online-btn',function(){
+   var  project_id = $(this).attr('data-id')
+   var parent = $("[data-id="+project_id+"]").parents('tr');
+   var host = parent.find(".host").html();
+   str = "project_id="+project_id+"&host="+host
+   var data = {"method":"project_test","formdata":str}
+   $.post("/addapi",data,function(data){
+       data = JSON.parse(data)
+       data = JSON.parse(data['result'])
+       if (data['code']==0){
+           console.log("添加记录成功")
+            list()
+            datatable()
+            swal({  title:"Success",
+                    text:data['result'],
+                    type:"success",
+                    confirmButtonText:'确定'
+                    })
+       }else{
+            swal({  title:"Failed",
+                    text:data['errmsg'],
+                    type:"error",
+                    confirmButtonText:'确定'
+                })
+            
+       }
+   })
+})
+
+</script>
+{% endblock %}

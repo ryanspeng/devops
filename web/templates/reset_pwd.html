@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="pragma" content="no-cache">
+    <meta name="robots" content="index,follow">
+    <meta name="Author" content="Yuanxin Inc.">
+    <meta name="Description" content="Yuanxin Devops  System">
+
+    <link type="image/x-icon" rel="shortcut icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/user.login.css')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='sweetalert/dist/sweetalert.css')}}">
+    
+    <title>用户首次登陆重置密码</title>
+    </head>
+    <body>
+        <div id="logo">
+        </div>
+        <!--reset password again-->
+        <div id="loginbox">
+            <form  accept-charset="UTF-8" method="POST"  autocomplete="off" id="resetpwd">
+                <div style="display:block; padding-top:15px; height:26px; color:#FF0000;">
+                    <div id="error_hint"></div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <div class="input-prepend">
+                            <input type="password" name="oldpasswd" placeholder="旧密码">
+                        </div>
+                    </div>
+                </div>   <!--end user_mail -->
+                <div class="control-group">
+                    <div class="controls">
+                        <div class="input-prepend">
+                            <input type="password" name="newpasswd" placeholder="新密码">
+                        </div>
+                    </div>
+                </div>  <!--end user_pwd-->
+
+                <div class="form-actions" style="margin-top:0px;">
+                    <span class="pull-left">
+                        <a href="#" class="flip-link" id="to-recover"></a>
+                    </span>
+                    <span class="pull-right">
+                        <input type="submit" class="btn btn-inverse" id="submit_data_btn" value="确认">
+                    </span>
+                </div> <!--end form-action-->
+            </form> <!--end form-->
+        </div>
+        <!--reset password again-->
+
+<!--Footer-part-->
+<div class="row-fluid">
+    <div id="footer" class="span12"></div>
+</div>
+<script type="text/javascript" src="{{url_for('static',filename='sweetalert/dist/sweetalert.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='js/jquery.min.js')}}"></script>
+
+<script type="text/javascript">
+$('#resetpwd').on('submit',function(){
+    var str = $('#resetpwd').serialize()
+    $.post('/user/chpwdoneself',str,function(data){
+        data = JSON.parse(data)
+        if (data['code']==0){
+            location.href="/"
+        }else{
+            str = data['errmsg']
+           swal({
+                title: "Error",
+                text:str,
+                type:"error",
+                confirmButtonText: "Cool"
+            }); 
+
+        }
+    })
+        return false;
+
+})
+
+</script>
+
+
+</body></html>

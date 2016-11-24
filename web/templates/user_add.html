@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block css %} 
+
+<link rel="stylesheet" href="{{url_for('static',filename='css/validform.css')}}">
+{% endblock%}
+
+{% block title %}添加用户{% endblock %}
+{% block breadcrumb %}<a href="/user/add">添加用户</a>{% endblock %}
+
+{% block h1 %}添加用户{% endblock %}
+
+<!--主体内容-->
+{% block row %}
+<div class="widget-box">
+   <div class="widget-title"> 
+      <span class="icon"> <i class="icon-info-sign"></i> </span>
+      <h5>添加用户</h5>
+   </div> <!--end widget-title-->
+
+   <div class="widget-content">
+     
+       <form class="form-horizontal" id="user_signup_form" accept-charset="UTF-8" method="POST" autocomplete="off" novalidate="novalidate">
+    <div class="control-group">
+        <label class="control-label">角色：</label>
+        <div class="controls">
+            <select name='role' id='role' style='width:120px'> 
+                <option value=0>超级管理员</option>
+                <option value=1>普通用户</option>
+            </select>
+        </div>
+    </div>
+	<div class="control-group">
+		<label class="control-label">所属组</label>
+		<div class="controls">
+                <select id="r_id" name="r_id" class="multiselect" multiple="multiple" >
+                </select>
+		</div>
+	</div>
+    <div class="control-group">
+        <label class="control-label">用户名：</label>
+        <div class="controls">
+         <input type="text" name="username" id="username"  datatype="s5-16" errormsg="必须是5-16个字符" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">姓名：</label>
+        <div class="controls">
+            <input  type="text" name="name" id="name" datatype="zh2-4" errormsg="必须是2-4个中文字符" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">E-mail：</label>
+        <div class="controls">
+            <input  type="email"  name="email" id="email" datatype="e" errormsg="Email格式不正确" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">手机：</label>
+        <div class="controls">
+            <input type="text" name="mobile" id="mobile" datatype="m" errormsg="手机格式不对"  />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">状态：</label>
+        <div class="controls">
+            <select name='is_lock' id='is_lock' style='width:120px'> 
+                 <option value=0>正常</option>
+                 <option value=1>锁定</option>
+              </select>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">登录密码：</label>
+        <div class="controls">
+             <input  type="password" name="password" id="password" datatype="*6-15" errormsg="密码需要6~15位之间" />
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">重复输入密码：</label>
+        <div class="controls">
+               <input  type="password" name="repwd" id="repwd"  datatype="*" recheck="password" errormsg="您两次输入的账号密码不一致！" />
+        </div>
+    </div>
+    <div class="form-actions">
+          <input type="button" href="javascript:void(0);" id="submit_data_btn" value="确定添加" class="btn btn-success global_radius_4">
+    </div>
+    </form> 
+       
+       
+  </div> <!--widget-content  end -->
+</div><!--widget-box end-->
+{% endblock %}
+
+{% block js %}
+<script>
+
+/*检查表单数据是否合法*/
+$("#user_signup_form").Validform({
+    btnSubmit:"#submit_data_btn",
+    tiptype:3, 
+    datatype:{
+        "zh2-4" : /^[\u4E00-\u9FA5\uf900-\ufa2d]{2,4}$/,
+    }
+})
+
+$("#submit_data_btn").on('click',function(){
+    if ($('#r_id').val() == null || $('#r_id').val() == ""){
+        swal("OMG!", "你必须选择一个组", "error")
+    }else{
+        add()
+     }
+ })
+
+name="user"
+/*通过jsonrpc接口统一处理*/
+function add(){
+          var str = $('#user_signup_form').serialize()
+        console.log(str)
+        var data={'method':name,'formdata':str}
+        $.post('/addapi',data,function(data){ 
+            data=JSON.parse(data);   //将json串转换为对象，然后取值
+            data = JSON.parse(data['result']) //object
+            if (data['code']==0){
+                swal("Good!", "创建用户成功", "success"); 
+                 window.location='/user/list'
+            }else{
+                swal("error","创建用户失败," + data['errmsg'],"error")
+             }
+         })
+}
+
+
+
+/*列出所有组的信息，并拼接成复选框*/
+function list(){
+	var url = "/listapi?method=groups"
+	$.getJSON(url, function(data){
+		data=JSON.parse(data['result'])
+		console.log(data)	
+        if (data['code']== 0){
+            var str = ''
+            $.each(data.result, function(k,v){
+                //console.log(v)
+                str += '<option value="'+v['id']+'">'+v['name']+'</option>'
+            })
+            $("#r_id").html(str)
+            $('#r_id').multiselect({maxHeight:200, enableCaseInsensitiveFiltering: true})
+            $("#r_id").multiselect('refresh')
+        }else{
+            swal({
+                title:"error", 
+                text:data['errmsg'],
+                type:"error"
+                },function(){
+                    location.href="/login"
+                });
+        } //if end
+	})
+
+}
+list()
+
+</script>
+{% endblock %}

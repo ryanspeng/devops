@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+{% block css %}
+<style>
+.notice {
+    color:red;
+    font-size: large;
+}
+</style>
+{% endblock %}
+{% block title %}个人信息{% endblock %}
+{% block breadcrumb %}<a href="/">个人中心</a>{% endblock %}
+
+{% block h1 %}个人信息{% endblock %}
+
+<!--主体内容-->
+{% block row %}
+<div class="widget-box">
+       <div class="widget-title"> 
+          <span class="icon"> <i class="icon-briefcase"></i> </span>
+	      <h5>您的个人资料</h5>
+          <h5 style="float:right;" id = "edit">
+         （<i class="icon-edit"></i>编辑个人资料）</h5>
+          <h5 style="float:right;" id = "passwd">
+              (<i class="icon-edit"></i><strong>修改密码</strong>)</h5>
+	   </div> <!--end widget-title-->
+<!--更新密码模态窗-->
+<div id="updatepasswd"  class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	<h3>修改个人密码</h3>
+  </div> <!--modal-header end-->
+  <div class="modal-body">
+    <form class="form-horizontal" id="updatepw" method="POST">
+     	<div class="form-group">
+			<label class="control-label">旧密码</label>
+     		 <div class="controls">
+       		 	<input id="oldpasswd"  type="password"  name="oldpasswd" >
+      		</div> 
+       	</div> <!-- oldpasswd end-->
+     	<div class="form-group">
+			<label class="control-label">新密码</label>
+     		 <div class="controls">
+       		 	<input id="newpasswd"  type="password"  name="newpasswd" >
+      		</div> 
+       	</div> <!--newpasswd  end-->
+    	<div class="form-group">
+     		<div class="modal-footer">
+				<button class="btn btn-primary" id = "uppwbtn" >更新</button>
+			 	<button class="btn btn-warning exit-btn" data-dismiss="modal">退出</button>
+            </div> 
+      </div><!--button end-->
+
+    </form><!--form end-->
+  </div> <!--modal-body end -->
+</div> <!--modal end-->
+<!--模态窗结束-->
+
+<!--更新个人信息模态窗-->
+<div id="editModal"  class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+ 	<h3>修改个人资料</h3>
+  </div> <!--modal-header end-->
+  <div class="modal-body">
+     <form class="form-horizontal" id="updateForm" method="POST">
+       	<input type="hidden" id="upid" name="id" value="{{ user.id }}">
+     	<div class="form-group">
+            <label class="control-label">用户名</label>
+     		 <div class="controls">
+       		 	<input id="upusername" name="username" value="{{ user.username }}">
+      		</div> 
+       	</div> <!-- username  end-->
+     	<div class="form-group">
+			 <label class="control-label">姓名</label>
+     		 <div class="controls">
+       		 	<input id="upname" name="name" value="{{ user.name }}">
+      		</div> 
+       	</div> <!--name  end-->
+     	<div class="form-group">
+            <label class="control-label">E-mail</label>
+     		 <div class="controls">
+       		 	<input id="upemail" name="email" value="{{ user.email }}">
+      		</div> 
+       	</div> <!--email  end-->
+     	<div class="form-group">
+            <label class="control-label">联系电话</label>
+     		 <div class="controls">
+       		 	<input id="upmobile" name="mobile" value="{{ user.mobile }}">
+      		</div>  
+       	</div> <!--mobile  end-->
+    	<div class="form-group">
+     		<div class="modal-footer">
+			 	<button class="btn btn-primary"  id = "upinfobtn">更新</button>
+				<button class="btn btn-warning exit-btn" data-dismiss="modal">退出</button>
+            </div> 
+      </div><!--button end-->
+
+    </form><!--form end-->
+  </div> <!--modal-body end -->
+</div> <!--modal end-->
+<!--模态窗结束-->
+
+<!--添加值班表模态窗-->
+<div id="addrotaModal"  class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>添加值班记录</h3>
+  </div> <!--modal-header end-->
+  <div class="modal-body">
+    <p hidden id="errorMsg" class="text-danger" style="color:red"></p> <!-- foe error msg-->
+    <form class="form-horizontal" id="addrota" method="POST">
+     	<div class="form-group">
+            <label class="control-label">开始日期</label>
+     		 <div class="controls">
+       		 	<input id="start_date" type="date" name="start_date" >
+      		</div> 
+       	</div> <!-- start_date end-->
+     	<div class="form-group">
+			<label class="control-label">结束日期</label>
+     		 <div class="controls">
+       		 	<input id="end_date"  type="date"  name="end_date" >
+      		</div> 
+       	</div> <!--end_date end-->
+
+        <div class="form-group">
+			<label class="control-label">值班人</label>
+     		 <div class="controls">
+       		 	<input id="man_on_duty"  type="text"  name="man_on_duty" >
+      		</div> 
+       	</div> <!--end_date end-->
+
+    	<div class="form-group">
+     		<div class="modal-footer">
+                <button class="btn btn-primary" id="add_rota_btn" >添加</button>
+			 	<button class="btn btn-warning exit-btn" data-dismiss="modal">退出</button>
+            </div> 
+        </div><!--button end-->
+    </form><!--form end-->
+  </div> <!--modal-body end -->
+</div> <!--modal end-->
+<!--模态窗结束-->
+
+
+	<div class="widget-content">
+           <div class="row-fluid">
+               <div class="span6">
+					<table class="" id = "info">
+							<tr>
+                                <td><span><h4>{{ user.name }}</h4></td>
+							</tr>
+							<tr>
+                                <td><h6>{{ user.mobile }}</h6></td>
+							</tr>
+					</table>
+			    </div> <!--info end-->
+				<div class="span6">
+					<table class="table table-bordered table-invoice" id = "detail">
+							<tr>
+							 	<td class="width30">E-mail地址：</td>
+                                <td class="width70" id="getemail">{{ user.email }}</td>
+							</tr>
+							<tr>
+								<td>用户角色</td>
+								<td id='getrole' data='0'>{% if user.role == 0 %}超级管理员{% else %}普通用户{% endif %}</td>
+							</tr>
+                            <tr> <!--用户所属组，异步拼接-->
+								<td>所属管理组:</td>
+					 			<td id="user_groups"><strong>{{ user.groups }}</strong></td>
+							</tr>
+                            <tr>                <!--用户的权限，异步拼接-->
+								<td>用户权限:</td>
+					 			<td id="user_power">{{ user.perm|safe() }}</td>
+  							</tr>
+					</table> 
+                </div><!--detail end-->
+                
+           </div> <!--row-fluid end-->
+    </div> <!--widget-content  end -->
+</div><!--widget-box end-->
+
+<div class="widget-box">
+       <div class="widget-title"> 
+          <span class="icon"> <i class="icon-briefcase"></i> </span>
+          <h5>值班表</h5>
+          {% if user.role ==0 %}
+          <h5 style="float:right;" id="iadd_rota"><a href='/rota'>管理值班列表</a><h5>
+              <!--     （<i class="icon-edit"></i>添加值班记录）</h5>-->
+        {% endif %}
+	   </div> <!--end widget-title-->
+            
+	    <div class="widget-content">
+           <div class="row-fluid">
+               <div class="span8">
+					<table class="table table-bordered" id="rota">
+                        <thead>
+							<tr>
+                                <th scope="col"><h4>开始日期</h4></th>
+                                <th scope="col"><h4>结束日期</h4></th>
+                                <th scope="col"><h4>值班人</h4></th>
+							</tr>
+                        </thead>
+                        <tbody class="rota_list">
+						</tbody>
+					</table>
+                    <p><strong>注：标颜色的为当前值班人员,有什么需求请</strong><strong class="notice">先提工单</strong>，<strong>然后</strong><strong class="notice">找值班人员</strong>!</strong></p>
+               </div>
+           </div>
+        </div>
+</div>
+
+{% endblock %}
+{% block js %}
+<script>
+name='user'
+
+/*修改个人信息模态窗 */
+$("#edit").on('click',function(){
+    $('#editModal').modal('show')  
+})
+
+
+/*用户自己个人信息修改*/
+$("#upinfobtn").on('click',function(){
+   var str = $("#updateForm").serialize()
+   var data = {'method':name,'formdata':str}
+   $.post('/updateapi',data,function(data){
+        data=JSON.parse(data)
+        data = JSON.parse(data['result']) //object
+        if(data['code'] == 0){   //recevie json object
+                swal({
+                    title:"success",
+                    text:"个人资料更新成功",
+                    type:"success",
+                    confirmButtonText:'个人资料更新成功'
+                    },function(){
+                         $('#editModal').modal('hide')
+                         window.location.reload();
+                    })
+             
+        }else{
+                 swal("error", data['errmsg'],"error")
+        }
+   })
+        return false
+})
+
+/*修改密码的模态窗显示 */
+$("#passwd").on('click',function(){
+    $('#updatepasswd').modal('show')  
+})
+
+
+/*用户自己修改密码*/
+$("#uppwbtn").on('click',function(){
+   var str = $("#updatepw").serialize()
+   var url = '/user/chpwdoneself'
+   $.post(url,str,function(data){
+       data=JSON.parse(data)
+        if (data['code']==0){   //recevie json object
+             swal("更新成功")
+             $('#updatepasswd').modal('hide')
+        }else{
+             swal(data['errmsg'])
+             }
+   })
+        return false
+})
+
+$("#add_rota").on('click',function(){
+    $('#addrotaModal').modal('show')  
+})
+
+//add_rota_btn
+$('#add_rota_btn').on('click',function(){
+	   var str = $('#addrota').serialize()
+           console.log(str)
+       var data = {"method":'rota',"formdata":str}
+	   $.post("/addapi",data,function(data){
+	     //console.log(data)    //string
+         data = JSON.parse(data)  //object
+         data = JSON.parse(data['result']) //object
+         if (data['code']==0){
+			  swal({
+						title:"添加成功",
+						type: "success",
+						confirmButtonText: "Cool"
+					},function(){                    
+						$('#addModal').modal('hide')
+						list()
+						location.reload()
+					})  //end swal
+         }else{
+		    $('#errorMsg').html('Failed: '+data['errmsg']).show()
+         }
+ }) //end post
+	   return false
+})  //submit form
+
+
+
+function list(){
+    var url = "/listapi?method=rota&condition=True"
+    $.getJSON(url,function(data){
+      // data = data['result']  //string
+       data=JSON.parse(data['result']); //object 
+       console.log("data=",data)   
+       var str = ''
+       $.each(data.result,function(k,v){   //循环输出数组Array[3]的值
+            if (k == 0){
+                str += '<tr  class="odd gradeX error">'
+            }else{
+                str += '<tr class="odd gradeX">'
+            }
+             
+           str += '<td style="text-align:center;">'+v['start_date']+'</td>'+  
+           '<td style="text-align:center;">'+v['end_date']+'</td>'+  
+           '<td style="text-align:center;">'+v['man_on_duty']+'</td>'+ 
+           '</tr>'          
+       })       
+         $(".rota_list").html(str)
+    })
+}
+list()
+
+
+</script>
+{% endblock %}
