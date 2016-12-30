@@ -10,8 +10,8 @@ headers = {'content-type': 'application/json'}
 #所有api的web页面展示文件 
 
 def post_cdn():
-    USER = "yuanxin"
-    PASS = "MiaoShou!2#4%"
+    USER = ""
+    PASS = ""
     url = "http://wscp.lxdns.com:8080/wsCP/servlet/contReceiver"
     qs = {'username': USER}
     try:
